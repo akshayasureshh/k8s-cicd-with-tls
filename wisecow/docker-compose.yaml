@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  wisecow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wisecow-app
+    ports:
+      - "4499:4499"
+    restart: unless-stopped
