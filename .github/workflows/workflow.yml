@@ -48,6 +48,7 @@ jobs:
       run: |
         REGISTRY="${{ env.DOCKER_REGISTRY }}"
         
+        # Load .env file if it exists - with safer approach
         if [ -f .env ]; then
           echo "Reading environment variables from .env file"
           while IFS='=' read -r key value || [ -n "$key" ]; do
