@@ -46,11 +46,22 @@ jobs:
     
     - name: Update Kubernetes manifests
       run: |
+        REGISTRY="${{ env.DOCKER_REGISTRY }}"
+        
         if [ -f .env ]; then
-          export $(grep -v '^#' .env | xargs)
+          echo "Reading environment variables from .env file"
+          while IFS='=' read -r key value || [ -n "$key" ]; do
+            if [[ $key && ! $key =~ ^# && $value ]]; then
+              value=$(echo $value | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+              if [[ $key == "DOCKER_REGISTRY" ]]; then
+                REGISTRY="$value"
+                echo "Using DOCKER_REGISTRY from .env file"
+              fi
+            fi
+          done < .env
         fi
         
-        REGISTRY="${DOCKER_REGISTRY:-${{ env.DOCKER_REGISTRY }}}"
+        echo "Using registry: ${REGISTRY}"
         
         sed -i "s|image: \${{ env.DOCKER_REGISTRY }}/wisecow:latest|image: ${REGISTRY}/wisecow:${{ github.sha }}|g" k8s/deployment.yaml
         
