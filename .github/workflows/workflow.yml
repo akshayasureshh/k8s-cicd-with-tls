@@ -1,4 +1,4 @@
-name: Build and Deploy Wisecow
+name: Deploy Wisecow (New)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     
     env:
@@ -38,27 +38,30 @@ jobs:
     - name: Set up kubectl
       uses: azure/setup-kubectl@v1
     
-    - name: Configure Kubernetes config
+    - name: Create kubeconfig file safely
       run: |
         mkdir -p $HOME/.kube
         
-        echo "Attempting to write config with base64 decoding first..."
-        if echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config 2>/dev/null; then
-          echo "Successfully decoded KUBE_CONFIG with base64"
-        else
-          echo "Base64 decoding failed, writing KUBE_CONFIG directly"
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
-        fi
-        
+        # Write the raw config without any decoding
+        echo "Creating kubeconfig file directly without decoding..."
+        echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
         
-        echo "Kubeconfig file created. Checking if it exists:"
+        # Debug: Check if the file exists
+        echo "Kubeconfig file created at: $HOME/.kube/config"
         ls -la $HOME/.kube/
     
-    - name: Direct update of deployment manifest
+    - name: Test kubectl config
       run: |
+        # Test if kubectl can use the config without actually connecting
+        kubectl config view --minify
+        
+    - name: Update deployment manifest
+      run: |
+        # Directly replace the image without using .env file
         sed -i "s|image: .*|image: ${{ env.DOCKER_REGISTRY }}/wisecow:${{ github.sha }}|g" k8s/deployment.yaml
         
+        # Debug output
         echo "Deployment after update:"
         cat k8s/deployment.yaml
     
