@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    env:
+      DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY || secrets.DOCKER_USERNAME }}
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -38,12 +41,25 @@ jobs:
     - name: Configure Kubernetes config
       run: |
         mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
     
     - name: Update Kubernetes manifests
       run: |
-        sed -i "s|${{ env.DOCKER_REGISTRY }}/wisecow:latest|${{ secrets.DOCKER_USERNAME }}/wisecow:${{ github.sha }}|g" k8s/deployment.yaml
+        # Load .env file if it exists
+        if [ -f .env ]; then
+          export $(grep -v '^#' .env | xargs)
+        fi
+        
+        # Use DOCKER_REGISTRY from .env if available, otherwise use from GitHub
+        REGISTRY="${DOCKER_REGISTRY:-${{ env.DOCKER_REGISTRY }}}"
+        
+        # Update the deployment.yaml with the correct image
+        sed -i "s|image: \${{ env.DOCKER_REGISTRY }}/wisecow:latest|image: ${REGISTRY}/wisecow:${{ github.sha }}|g" k8s/deployment.yaml
+        
+        # Debug: Let's see what the file looks like after substitution
+        echo "Updated deployment.yaml:"
+        cat k8s/deployment.yaml
     
     - name: Deploy to Kubernetes
       run: |
