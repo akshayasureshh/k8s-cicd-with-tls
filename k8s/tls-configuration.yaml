@@ -8,10 +8,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - wisecow.mywebsite.com
+    - wisecow.local
     secretName: wisecow-tls
   rules:
-  - host: wisecow.mywebsite.com
+  - host: wisecow.local
     http:
       paths:
       - path: /
