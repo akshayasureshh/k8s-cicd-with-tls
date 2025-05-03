@@ -35,26 +35,4 @@ jobs:
           ${{ secrets.DOCKER_USERNAME }}/wisecow:latest
           ${{ secrets.DOCKER_USERNAME }}/wisecow:${{ github.sha }}
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v1
-
-    - name: Create kubeconfig file
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
-        chmod 600 $HOME/.kube/config
-
-    - name: Test kubeconfig
-      run: kubectl config view --minify
-
-    - name: Update deployment image
-      run: |
-        sed -i "s|image: .*|image: ${{ env.DOCKER_REGISTRY }}/wisecow:${{ github.sha }}|g" k8s/deployment.yaml
-        echo "Updated deployment file:"
-        cat k8s/deployment.yaml
-
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
-        kubectl apply -f k8s/ingress.yaml
+  
