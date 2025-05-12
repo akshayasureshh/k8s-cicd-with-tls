@@ -10,7 +10,7 @@ RUN apt-get update && \
     ln -s /usr/games/fortune /usr/bin/fortune
 
 WORKDIR /app
-COPY wisecow.sh .
-RUN chmod +x wisecow.sh
+COPY app.sh .
+RUN chmod +x app.sh
 EXPOSE 4499
-CMD ["./wisecow.sh"]
+CMD ["./app.sh"]

@@ -1,12 +1,12 @@
-# Wisecow Application Deployment and Containerization
+# app Application Deployment and Containerization
 
 ## Overview
-This project demonstrates the **containerization** of the Wisecow application and its **deployment on Kubernetes** using a **CI/CD pipeline** through GitHub Actions. The end goal is to have an automated system that builds the Docker image, pushes it to a container registry, and deploys it to Kubernetes.
+This project demonstrates the **containerization** of the app application and its **deployment on Kubernetes** using a **CI/CD pipeline** through GitHub Actions. The end goal is to have an automated system that builds the Docker image, pushes it to a container registry, and deploys it to Kubernetes.
 
 ## Tasks Completed
 
 ### 1. **Dockerization**
-- Created a `Dockerfile` to containerize the Wisecow application.
+- Created a `Dockerfile` to containerize the app application.
 - The Dockerfile defines the necessary steps to package the app into a Docker image, including setting up dependencies and copying source files into the container.
 
 ### 2. **Kubernetes Deployment**
@@ -17,7 +17,7 @@ This project demonstrates the **containerization** of the Wisecow application an
 
 ### 3. **CI/CD Pipeline Implementation (GitHub Actions)**
 - Set up a **GitHub Actions** workflow that automatically:
-  - Builds the Docker image for the Wisecow app.
+  - Builds the Docker image for the app app.
   - Pushes the Docker image to **Docker Hub** for accessibility.
   
   The **continuous deployment (CD)** portion, which would automatically deploy the app to Kubernetes after the Docker image is pushed, has been omitted for this workflow due to the use of **Minikube**.
@@ -29,7 +29,7 @@ This project demonstrates the **containerization** of the Wisecow application an
 
 ## TLS Configuration for Secure Communication
 
-The **Wisecow Application** is secured with **TLS** (HTTPS) using **cert-manager** and **Let's Encrypt** to automate the process of acquiring and renewing SSL/TLS certificates. The setup is as follows:
+The **app Application** is secured with **TLS** (HTTPS) using **cert-manager** and **Let's Encrypt** to automate the process of acquiring and renewing SSL/TLS certificates. The setup is as follows:
 
 ### **TLS Ingress Configuration (`tls-configuration.yaml`)**
 
@@ -39,23 +39,23 @@ This configuration sets up an **Ingress** resource to route traffic securely to 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wisecow-ingress
+  name: app-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
   - hosts:
-    - wisecow.local
-    secretName: wisecow-tls
+    - app.local
+    secretName: app-tls
   rules:
-  - host: wisecow.local
+  - host: app.local
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: wisecow-service
+            name: app-service
             port:
               number: 80
